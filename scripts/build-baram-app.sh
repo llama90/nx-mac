@@ -153,7 +153,8 @@ step5_install_korean_env() {
 step6_install_plug() {
   info "[6/10] NexonPlug 설치"
   export WINEPREFIX="$WRAPPER_PATH/Contents/SharedSupport/prefix"
-  local plug_exe="$WINEPREFIX/drive_c/Nexon/NexonPlug/NexonPlug.exe"
+  local plug_dir="$WINEPREFIX/drive_c/Nexon/NexonPlug"
+  local plug_exe="$plug_dir/NexonPlug.exe"
 
   if [ -f "$plug_exe" ]; then
     ok "이미 설치됨"
@@ -166,14 +167,15 @@ step6_install_plug() {
     curl -fL "$PLUG_INSTALLER_URL" -o "$PLUG_INSTALLER_LOCAL"
   fi
 
-  info "  wine으로 installer 실행..."
-  "$WRAPPER_PATH/Contents/SharedSupport/wine/bin/wine" "$PLUG_INSTALLER_LOCAL" /S || \
-    warn "silent 설치 실패 가능 → GUI 창에서 계속 진행"
+  # The LocalInstaller SFX cannot overwrite itself while running inside Wine.
+  # Extract directly from macOS using unzip — the SFX is a standard zip archive.
+  info "  SFX에서 직접 추출 (unzip)..."
+  mkdir -p "$plug_dir"
+  unzip -o "$PLUG_INSTALLER_LOCAL" -d "$plug_dir" >/dev/null 2>&1 || \
+    die "unzip 추출 실패: $PLUG_INSTALLER_LOCAL"
+  chmod +x "$plug_exe"
 
-  # self-update race 방지: 설치 직후 Plug 종료
-  pkill -9 -f NexonPlug 2>/dev/null || true
-  sleep 2
-  ok "NexonPlug 설치 완료"
+  ok "NexonPlug 설치 완료 (첫 실행 시 한국 서버 접근 가능한 네트워크 환경에서 자동 업데이트됩니다)"
 }
 
 step7_disable_nexon_launcher_service() {
