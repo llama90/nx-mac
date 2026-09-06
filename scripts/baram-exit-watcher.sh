@@ -4,7 +4,7 @@
 # tear down the entire wine tree so that nothing stays in background.
 
 LOG=/tmp/baram-url-router.log
-WRAPPER=/Users/eggxoxo/Applications/Sikarugir/Baram.app
+WRAPPER="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 WINESERVER="$WRAPPER/Contents/SharedSupport/wine/bin/wineserver"
 
 echo "[exit-watcher] started pid=$$" >> "$LOG"
